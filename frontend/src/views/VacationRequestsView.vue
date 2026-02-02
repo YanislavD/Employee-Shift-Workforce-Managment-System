@@ -9,7 +9,7 @@
         <label>Служител</label>
         <select v-model="form.employeeId" required>
           <option value="">— избери —</option>
-          <option v-for="e in employees.filter(x => x.active)" :key="e.id" :value="e.id">
+          <option v-for="e in (employees || []).filter(x => x.active)" :key="e.id" :value="e.id">
             {{ e.firstName }} {{ e.lastName }}
           </option>
         </select>
@@ -188,7 +188,12 @@ async function approve(id) {
   }
 }
 
-onMounted(load)
+onMounted(() => {
+  load()
+  if (currentUser?.value && !form.value.employeeId) {
+    form.value.employeeId = String(currentUser.value.id)
+  }
+})
 </script>
 
 <style scoped>

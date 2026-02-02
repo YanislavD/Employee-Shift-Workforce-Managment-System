@@ -39,6 +39,9 @@ public class VacationRequestService {
 
     @Transactional
     public VacationRequestDto create(VacationRequestDto dto) {
+        if (dto.getEndDate().isBefore(dto.getStartDate())) {
+            throw new RuntimeException("End date must be after start date");
+        }
         Employee employee = employeeRepository.findById(dto.getEmployeeId())
                 .orElseThrow(() -> new RuntimeException("Employee not found: " + dto.getEmployeeId()));
         VacationRequest v = VacationRequest.builder()
@@ -56,6 +59,9 @@ public class VacationRequestService {
     public VacationRequestDto updateStatus(Long id, VacationRequestStatus status, Long approvedById, String rejectionReason) {
         VacationRequest v = vacationRequestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Vacation request not found: " + id));
+        if (v.getStatus() != VacationRequestStatus.PENDING) {
+            throw new RuntimeException("Only pending requests can be approved or rejected");
+        }
         v.setStatus(status);
         if (approvedById != null) {
             Employee approver = employeeRepository.findById(approvedById)
